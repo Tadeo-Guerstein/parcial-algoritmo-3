@@ -24,7 +24,7 @@ async function handleSubmit(event) {
   //   return
   // }
   // localStorage.setItem('user', user)
-  // window.location.href = "http://127.0.0.1:8000/customers";
+  window.location.href = "http://127.0.0.1:8000/customers";
 }
 
 form.onsubmit = handleSubmit;

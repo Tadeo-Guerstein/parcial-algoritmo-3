@@ -22,3 +22,6 @@ class CustomersManager:
     """)
 
     self.connection = conexion
+
+  def login(self, user):
+    print('user', user)

@@ -3,7 +3,7 @@ from flask_cors import CORS
 from bd import CustomersManager as bd
 
 app = Flask(__name__)
-CORS(app, resources={r"/customer/*": {"origins": "*"}})
+CORS(app, resources={r"/customers/*": {"origins": "*"}})
 
 @app.route("/")
 def home():
@@ -22,6 +22,7 @@ def login():
     body = request.json
     print("body", body)
     cone = bd()
+    cone.login(body['username'])
     return []
 
 app.run(host="0.0.0.0", port=8000, debug=True)  
