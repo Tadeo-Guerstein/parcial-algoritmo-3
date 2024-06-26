@@ -17,10 +17,7 @@ async function handleSubmit(event) {
   // const data = await response.json()
 
   // if (response.status !== 200) {
-  //   password.className += ' border-danger'
   //   username.className += ' border-danger'
-  //   errorLabelPass.innerText = data.message
-  //   errorLabelUser.innerText = data.message
   //   return
   // }
   // localStorage.setItem('user', user)
