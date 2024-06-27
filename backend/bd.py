@@ -30,6 +30,8 @@ class CustomersManager:
 
                 if existing_user:
                     # si existe el usuario tiene que dar ok de una y enviar el customerID
+                    cursor.execute("UPDATE customers SET status = 1 WHERE id = ?", (existing_user[0],))
+                    self.connection.commit()
                     return {"message": f"Welcome {name}", "customerID": existing_user[0]}, 200
                 
                 # Insertar nuevo usuario en la base de datos
@@ -40,7 +42,28 @@ class CustomersManager:
                 cursor.execute("SELECT id FROM customers WHERE name=?", (name,)) 
                 user = cursor.fetchone()
 
-                return {"message": f"User '{name}' successfully added", "customerID": user[0]}, 201
+                return {"message": f"User '{name}' successfully added", "customerID": user[0]}, 200
+            
+        except bd.Error as e:
+            # Manejar errores de la base de datos
+            return {"error": str(e)}, 500
+        
+    def change_status(self, customerID):
+        try:
+                cursor = self.connection.cursor()
+                # Verificar si el usuario ya existe en la base de datos
+                cursor.execute("SELECT * FROM customers WHERE id=?", (customerID,))
+                existing_user = cursor.fetchone()
+
+                if not existing_user:
+                    # si existe el usuario tiene que dar ok de una y enviar el customerID
+                    return {"error": f"It doesn't exist a customer with that ID"}, 406
+                
+                # Insertar nuevo usuario en la base de datos
+                cursor.execute("UPDATE customers SET status = 0 WHERE id = ?", (customerID,))
+                self.connection.commit()
+
+                return {"message": f"ok"}, 200
             
         except bd.Error as e:
             # Manejar errores de la base de datos
