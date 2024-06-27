@@ -64,6 +64,21 @@ class CustomersManager:
                 self.connection.commit()
 
                 return {"message": f"ok"}, 200
+        except bd.Error as e:
+            # Manejar errores de la base de datos
+            return {"error": str(e)}, 500
+        
+    def get_customers(self):
+        try:
+                cursor = self.connection.cursor()
+                # Verificar si el usuario ya existe en la base de datos
+                cursor.execute("SELECT * FROM customers")
+                data = cursor.fetchall()
+                print('data', data)
+
+                users = [{"id": id, "nombre": nombre, "isLogged": True if status == 1 else (False)  } for id, nombre, status in data]
+
+                return {"message": "ok", "data": users}, 200
             
         except bd.Error as e:
             # Manejar errores de la base de datos

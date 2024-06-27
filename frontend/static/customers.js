@@ -1,55 +1,35 @@
 const URL = "http://localhost:8000";
 const tableContainer = document.querySelector(".table-responsive");
-const emptyText = document.getElementById("empty-text");
 const tbody = document.querySelector("tbody");
 const logout = document.getElementById("logout");
 
-async function getUsers() {
-  const response = await fetch(`${URL}/users`);
-  if (response.status === 200) {
-    return await response.json();
-  }
-}
-
-async function getGrupos() {
-  const response = await fetch(`${URL}/groups`);
+async function getCustomers() {
+  const response = await fetch(`${URL}/customers`);
   if (response.status === 200) {
     return await response.json();
   }
 }
 
 async function handleOnLoad() {
-  // const { data: users } = await getUsers()
-  // const { data: grupos } = await getGrupos()
-  // if (grupos.length > 0) {
-  //   grupos.forEach((i) => {
-  //     const option = document.createElement('option')
-  //     option.value = JSON.stringify(i)
-  //     option.text = i.name.toUpperCase()
-  //     select.add(option)
-  //   })
-  // }
-  // if (users.length > 0) {
-  //   users.forEach((i) => {
-  //     const tBodyRow = tbody.insertRow()
-  //     const tBodyCellId = tBodyRow.insertCell()
-  //     const tBodyCellName = tBodyRow.insertCell()
-  //     const tBodyCellGroup = tBodyRow.insertCell()
-  //     const tBodyCellEstado = tBodyRow.insertCell()
-  //     tBodyCellId.innerText = i.id
-  //     tBodyCellName.innerText = i.username
-  //     tBodyCellGroup.innerText = i.groups?.join?.(', ') || 'Sin grupo'
-  //     tBodyCellEstado.innerText = 'Activo'
-  //     if (!i.isLogged) {
-  //       tBodyCellEstado.innerText = 'Inactivo'
-  //     }
-  //   })
-  //   return
-  // }
-  // const span = document.createElement('span')
-  // span.id = 'empty-text'
-  // span.innerText = 'No hay datos para listar'
-  // tableContainer.appendChild(span)
+  const {data: users} = await getCustomers() 
+  console.log('users', users)
+  if (users.length > 0) {
+    users.forEach((i) => {
+      const tBodyRow = tbody.insertRow()
+      const tBodyCellId = tBodyRow.insertCell()
+      const tBodyCellName = tBodyRow.insertCell()
+      const tBodyCellGroup = tBodyRow.insertCell()
+      const tBodyCellEstado = tBodyRow.insertCell()
+      tBodyCellId.innerText = i.id
+      tBodyCellName.innerText = i.nombre
+      tBodyCellGroup.innerText = i.groups?.join?.(', ') || 'Orden vacía'
+      tBodyCellEstado.innerText = 'Activo'
+      if (!i.isLogged) {
+        tBodyCellEstado.innerText = 'Inactivo'
+      }
+    })
+    return
+  }
 }
 
 async function handleOnClickLogout() {

@@ -23,4 +23,10 @@ def logout(customerID):
 
     return jsonify(response[0])#estás devolviendo una respuesta en formato JSON al cliente, [0] porque es una tupla y tiene que enviarse solo el primer dato de la tupla
 
+@app.route("/customers", methods=['GET'])
+def getCustomers():
+    response = customers_manager.get_customers()
+
+    return jsonify(response[0])#estás devolviendo una respuesta en formato JSON al cliente, [0] porque es una tupla y tiene que enviarse solo el primer dato de la tupla
+
 app.run(host="0.0.0.0", port=8000, debug=True) 
