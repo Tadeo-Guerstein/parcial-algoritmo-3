@@ -1,4 +1,4 @@
-const URL = "http://127.0.0.1:8000";
+const URL = "http://localhost:8000";
 const username = document.getElementById("username");
 const form = document.querySelector("form");
 
@@ -14,7 +14,7 @@ async function handleSubmit(event) {
     body: JSON.stringify({ name: user }), // Cambiado de 'username' a 'name'
   });
 
-  window.location.href = "http://127.0.0.1:8000/customers";
+  window.location.href = "./customers.html";
 }
 
 form.onsubmit = handleSubmit;
