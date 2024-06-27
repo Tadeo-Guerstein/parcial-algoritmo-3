@@ -14,7 +14,16 @@ async function handleSubmit(event) {
     body: JSON.stringify({ name: user }), // Cambiado de 'username' a 'name'
   });
 
-  window.location.href = "./customers.html";
+  const { message, error, customerID } = await response.json();
+  if (response.status !== 200) {
+    alert(error);
+    return;
+  }
+
+  alert(message);
+
+  localStorage.setItem("customerID", customerID);
+  window.location.href = "./customers";
 }
 
 form.onsubmit = handleSubmit;

@@ -29,12 +29,18 @@ class CustomersManager:
                 existing_user = cursor.fetchone()
 
                 if existing_user:
-                    return {"error": f"User with name '{name}' already exists"}, 406
+                    # si existe el usuario tiene que dar ok de una y enviar el customerID
+                    return {"message": f"Welcome {name}", "customerID": existing_user[0]}, 200
                 
                 # Insertar nuevo usuario en la base de datos
-                cursor.execute("INSERT INTO customers (name, status) VALUES (?, ?)", (name, 1))
+                cursor.execute("INSERT INTO customers (name, status) VALUES (?, ?)", (name, 1, ))
                 self.connection.commit()
-                return {"message": f"User '{name}' successfully added"}, 201
+
+                # selecciono ultimo customer que ingrese para saber el id y enviarlo al front
+                cursor.execute("SELECT id FROM customers WHERE name=?", (name,)) 
+                user = cursor.fetchone()
+
+                return {"message": f"User '{name}' successfully added", "customerID": user[0]}, 201
             
         except bd.Error as e:
             # Manejar errores de la base de datos
