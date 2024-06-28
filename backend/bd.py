@@ -84,3 +84,38 @@ class CustomersManager:
             # Manejar errores de la base de datos
             return {"error": str(e)}, 500
 
+    def add_order(self, customerID, orderName):
+        try:
+                cursor = self.connection.cursor()
+                # Verificar si el usuario ya existe en la base de datos
+                cursor.execute("SELECT * FROM customers WHERE id=?", (customerID,))
+                existing_user = cursor.fetchone()
+
+                if not existing_user:
+                    # si existe el usuario tiene que dar ok de una y enviar el customerID
+                    return {"error": f"It doesn't exist a customer with that ID"}, 406
+                
+                # Insertar nuevo usuario en la base de datos
+                cursor.execute("INSERT INTO orders (id_customer, orderDate, orderName) VALUES (?, datetime('now'), ?)", (customerID, orderName, ))
+                self.connection.commit()
+
+                return {"message": f"Order '{orderName}' successfully added"}, 200
+            
+        except bd.Error as e:
+            # Manejar errores de la base de datos
+            return {"error": str(e)}, 500
+        
+    def get_orders(self, customerID):
+        try:
+                cursor = self.connection.cursor()
+                # Verificar si el usuario ya existe en la base de datos
+                cursor.execute("SELECT * FROM orders WHERE id_customer=?", (customerID,))
+                data = cursor.fetchall()
+
+                orders = [{"id": id, "id_customer": id_customer, "orderDate": orderDate, "orderName": orderName } for id, id_customer, orderDate, orderName in data]
+
+                return {"message": "ok", "data": orders}, 200
+            
+        except bd.Error as e:
+            # Manejar errores de la base de datos
+            return {"error": str(e)}, 500

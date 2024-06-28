@@ -1,4 +1,4 @@
-const URL = 'http://localhost:8080'
+const URL = 'http://localhost:8000'
 const tableContainer = document.querySelector('.table-responsive')
 const emptyText = document.getElementById('empty-text')
 const form = document.querySelector('form')
@@ -7,7 +7,8 @@ const tbody = document.querySelector('tbody')
 const logout = document.getElementById('logout')
 
 async function getGrupos() {
-  const response = await fetch(`${URL}/groups`)
+  const customerID = localStorage.getItem('customerID')
+  const response = await fetch(`${URL}/order/${customerID}`)
   if (response.status === 200) {
     return await response.json()
   }
@@ -16,15 +17,19 @@ async function getGrupos() {
 async function handleOnLoad() {
   const { data: grupos } = await getGrupos()
   if (grupos.length > 0) {
+    const rows = tbody.rows.length
+    for (let i = 0; i < rows; i++) {
+      tbody.deleteRow(0)
+    }
     grupos.forEach((i) => {
       const tBodyRow = tbody.insertRow()
       const tBodyCellId = tBodyRow.insertCell()
       const tBodyCellName = tBodyRow.insertCell()
       const tBodyCellActionName = tBodyRow.insertCell()
 
-      tBodyCellId.innerText = i.id
-      tBodyCellName.innerText = i.name
-      tBodyCellActionName.innerText = i.users?.join(', ') || 'Sin usuarios asignados'
+      tBodyCellId.innerText = i.id;
+      tBodyCellName.innerText = i.orderName;
+      tBodyCellActionName.innerText = i.customerID?.join(', ') || 'Sin usuarios asignados'
     })
     return
   }
@@ -37,30 +42,31 @@ async function handleOnLoad() {
 async function handleOnSubmit(event) {
   event.preventDefault()
   const name = inputGroup.value
-  await fetch(`${URL}/groups`, {
-    method: 'POST',
-    mode: 'cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nombre: name })
-  })
+  const customerID = localStorage.getItem('customerID')
+  await fetch(`${URL}/order`, {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ customerID:customerID, orderName:name }),
+  });
+  await handleOnLoad();
 }
 
 async function handleOnClickLogout() {
-  const username = localStorage.getItem('user')
-  const response = await fetch(`${URL}/logout`, {
-    method: 'DELETE',
-    mode: 'cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username })
-  })
-  const data = await response.json()
+    const customerID = localStorage.getItem("customerID");
+    const response = await fetch(`${URL}/logout/${customerID}`, {
+        method: "PUT",
+        mode: "cors",
+        headers: { "Content-Type": "application/json" },
+    });
+    const data = await response.json();
 
-  if (response.status !== 200) {
-    alert(data.message)
-    return
-  }
+    if (response.status !== 200) {
+        alert(data.error);
+        return;
+    }
 
-  window.location.href = './login.html'
+    window.location.href = "/";
 }
 
 document.onload = handleOnLoad()
