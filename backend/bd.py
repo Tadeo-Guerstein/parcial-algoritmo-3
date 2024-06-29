@@ -108,11 +108,15 @@ class CustomersManager:
     def get_orders(self, customerID):
         try:
                 cursor = self.connection.cursor()
-                # Verificar si el usuario ya existe en la base de datos
-                cursor.execute("SELECT * FROM orders WHERE id_customer=?", (customerID,))
+                cursor.execute("""
+                    SELECT orders.id, orders.orderName, orders.orderDate, customers.name AS customer 
+                    FROM orders
+                    INNER JOIN customers ON customers.id = ?
+                    WHERE orders.id_customer = ?
+                """, (customerID, customerID, ))
                 data = cursor.fetchall()
 
-                orders = [{"id": id, "id_customer": id_customer, "orderDate": orderDate, "orderName": orderName } for id, id_customer, orderDate, orderName in data]
+                orders = [{"id": id,  "orderDate": orderDate, "orderName": orderName, "customer": customer } for id, orderName, orderDate, customer in data]
 
                 return {"message": "ok", "data": orders}, 200
             

@@ -25,11 +25,13 @@ async function handleOnLoad() {
       const tBodyRow = tbody.insertRow()
       const tBodyCellId = tBodyRow.insertCell()
       const tBodyCellName = tBodyRow.insertCell()
+      const tBodyCellFechaPedido = tBodyRow.insertCell()
       const tBodyCellActionName = tBodyRow.insertCell()
 
       tBodyCellId.innerText = i.id;
       tBodyCellName.innerText = i.orderName;
-      tBodyCellActionName.innerText = i.customerID?.join(', ') || 'Sin usuarios asignados'
+      tBodyCellFechaPedido.innerText = i.orderDate;
+      tBodyCellActionName.innerText = i.customer || 'Sin usuarios asignados'
     })
     return
   }
