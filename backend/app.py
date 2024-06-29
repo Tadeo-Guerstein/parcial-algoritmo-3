@@ -17,7 +17,7 @@ def login():
 
     return jsonify(response[0])#estás devolviendo una respuesta en formato JSON al cliente, [0] porque es una tupla y tiene que enviarse solo el primer dato de la tupla
 
-@app.route("/logout/<customerID>", methods=['PUT'])
+@app.route("/logout/<customerID>", methods=['PUT','OPTIONS'])
 def logout(customerID):
     response = customers_manager.change_status(customerID)
 
