@@ -84,8 +84,7 @@ class CustomersManager:
         #el where filtra las órdenes de la fecha maxima de cada cliente donde coincida el cliente con su orden(id_customer)
        
         data = cursor.fetchall()
-        customers = [{"id": id, "nombre": name, "isLogged": status, "groups": orderName} for id, name, status, orderName in data]
-        print(customers)
+        customers = [{"id": id, "nombre": name, "isLogged": status, "groups": orderName} for id, name, status, orderName in data]      
         return {"message": "ok", "data": customers}, 200
     
     def add_order(self, customerID, orderName):
