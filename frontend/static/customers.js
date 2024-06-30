@@ -22,7 +22,7 @@ async function handleOnLoad() {
       const tBodyCellEstado = tBodyRow.insertCell()
       tBodyCellId.innerText = i.id
       tBodyCellName.innerText = i.nombre
-      tBodyCellGroup.innerText = i.groups?.join?.(', ') || 'Orden vacía'
+      tBodyCellGroup.innerText = i.groups || 'Orden vacía'
       tBodyCellEstado.innerText = 'Activo'
       if (!i.isLogged) {
         tBodyCellEstado.innerText = 'Inactivo'
