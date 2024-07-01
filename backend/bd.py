@@ -68,7 +68,7 @@ class CustomersManager:
             # Manejar errores de la base de datos
             return {"error": str(e)}, 500
         
-    # Método dentro de la clase CustomersManager
+     # Método dentro de la clase CustomersManager
     def get_customers(self):
         cursor = self.connection.cursor()
         cursor.execute("""
@@ -86,7 +86,7 @@ class CustomersManager:
         data = cursor.fetchall()
         customers = [{"id": id, "nombre": name, "isLogged": status, "groups": orderName} for id, name, status, orderName in data]      
         return {"message": "ok", "data": customers}, 200
-    
+
     def add_order(self, customerID, orderName):
         try:
                 cursor = self.connection.cursor()
