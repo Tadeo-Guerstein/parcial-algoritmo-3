@@ -68,22 +68,25 @@ class CustomersManager:
             # Manejar errores de la base de datos
             return {"error": str(e)}, 500
         
+    # Método dentro de la clase CustomersManager
     def get_customers(self):
-        try:
-                cursor = self.connection.cursor()
-                # Verificar si el usuario ya existe en la base de datos
-                cursor.execute("SELECT * FROM customers")
-                data = cursor.fetchall()
-                print('data', data)
-
-                users = [{"id": id, "nombre": nombre, "isLogged": True if status == 1 else (False)  } for id, nombre, status in data]
-
-                return {"message": "ok", "data": users}, 200
-            
-        except bd.Error as e:
-            # Manejar errores de la base de datos
-            return {"error": str(e)}, 500
-
+        cursor = self.connection.cursor()
+        cursor.execute("""
+        SELECT customers.id, customers.name, customers.status, orders.orderName
+        FROM customers
+        INNER JOIN orders ON customers.id = orders.id_customer
+        WHERE orders.orderDate = (
+            SELECT MAX(orderDate)
+            FROM orders
+            WHERE id_customer = customers.id
+        )  
+        """,)
+        #el where filtra las órdenes de la fecha maxima de cada cliente donde coincida el cliente con su orden(id_customer)
+       
+        data = cursor.fetchall()
+        customers = [{"id": id, "nombre": name, "isLogged": status, "groups": orderName} for id, name, status, orderName in data]      
+        return {"message": "ok", "data": customers}, 200
+    
     def add_order(self, customerID, orderName):
         try:
                 cursor = self.connection.cursor()
