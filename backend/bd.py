@@ -1,5 +1,6 @@
 from sqlalchemy import Column, ForeignKey, create_engine
 from sqlalchemy.orm import sessionmaker
+from datetime import datetime
 from sqlalchemy.types import Integer, VARCHAR, Boolean, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import SQLAlchemyError
@@ -64,6 +65,7 @@ class DbManager:
         except SQLAlchemyError as e:
             return {"error": str(e)}, 500
         
+     # Método dentro de la clase CustomersManager
     def get_customers(self):
         try:
             customers = self.session.query(Customer).all()
@@ -107,5 +109,7 @@ class DbManager:
             return {"message": "ok", "data": data}, 200
             
         except SQLAlchemyError as e:
+        except SQLAlchemyError as e:
             # Manejar errores de la base de datos
+            return {"error": str(e)}, 500
             return {"error": str(e)}, 500
