@@ -52,7 +52,7 @@ function fillOrderTable(data) {
         tBodyCellId.innerText = i.id;
         tBodyCellName.innerText = i.orderName;
         tBodyCellFechaPedido.innerText = i.orderDate;
-        tBodyCellActionName.innerText = i.customerID?.join(", ") || "Sin usuarios asignados";
+        tBodyCellActionName.innerText = i.customer || "Sin usuarios asignados";
     });
 }
 
@@ -71,12 +71,12 @@ async function handleOnSubmit(event) {
 
 async function handleLogout() {
     const customerID = sessionStorage.getItem("customerID");
+    sessionStorage.removeItem("customerID");
     const response = await fetch(`${URL}/logout/${customerID}`, {
         method: "PUT",
         mode: "cors",
         headers: { "Content-Type": "application/json" },
     });
-    sessionStorage.removeItem("customerID");
     window.location.href = "/";
 }
 

@@ -33,7 +33,7 @@ function fillCustomerTable(data) {
         const tBodyCellEstado = tBodyRow.insertCell();
         tBodyCellId.innerText = i.id;
         tBodyCellName.innerText = i.nombre;
-        tBodyCellGroup.innerText = i.groups?.join?.(", ") || "Orden vacía";
+        tBodyCellGroup.innerText = i.groups || "Orden vacía";
         tBodyCellEstado.innerText = "Activo";
         if (!i.isLogged) {
             tBodyCellEstado.innerText = "Inactivo";
@@ -43,6 +43,7 @@ function fillCustomerTable(data) {
 
 async function handleLogout() {
     const customerID = sessionStorage.getItem("customerID");
+    sessionStorage.removeItem("customerID");
     const response = await fetch(`${URL}/logout/${customerID}`, {
         method: "PUT",
         mode: "cors",

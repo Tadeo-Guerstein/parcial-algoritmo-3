@@ -4,11 +4,6 @@ from sqlalchemy.types import Integer, VARCHAR, Boolean, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import SQLAlchemyError
 
-engine = create_engine('sqlite:///BD.db')
-
-Session = sessionmaker(bind=engine)
-session = Session()
-
 Base = declarative_base()
 
 class Customer(Base):
@@ -24,24 +19,30 @@ class Order(Base):
     orderName = Column(VARCHAR(256))
     orderDate = Column(TIMESTAMP)
 
-class CustomersManager: 
+class DbManager: 
+    def __init__(self) -> None:
+        engine = create_engine('sqlite:///BD.db')
+        Session = sessionmaker(bind=engine)
+        self.session = Session()
+        Base.metadata.create_all(engine)
+    
     def add_user(self, name):
         try:
             # Verificar si el usuario ya existe en la base de datos
-            existing_user = session.query(Customer).filter_by(name = name).first()
+            existing_user = self.session.query(Customer).filter_by(name = name).first()
             
             if existing_user:
                 # si existe el usuario tiene que dar ok de una y enviar el customerID
                 # TODO probar solo con el "existing_user"
-                customerToUpdate = session.query(Customer).filter_by(id = existing_user.id).first()
+                customerToUpdate = self.session.query(Customer).filter_by(id = existing_user.id).first()
                 customerToUpdate.status = 1
-                session.commit()
+                self.session.commit()
                 return {"message": f"Welcome {name}", "customerID": existing_user.id}, 200
 
             # Insertar nuevo usuario en la base de datos
             newCustomer = Customer(name = name, status = 1)
-            session.add(newCustomer)
-            session.commit()
+            self.session.add(newCustomer)
+            self.session.commit()
 
             return {"message": f"User '{name}' successfully added", "customerID": newCustomer.id}, 200
 
@@ -51,78 +52,60 @@ class CustomersManager:
         
     def change_status(self, customerID):
         try:
-            cursor = self.connection.cursor()
-            # Verificar si el usuario ya existe en la base de datos
-            cursor.execute("SELECT * FROM customers WHERE id=?", (customerID,))
-            existing_user = cursor.fetchone()
-
+            existing_user = self.session.query(Customer).filter_by(id=customerID).first()
+    
             if not existing_user:
-                # si existe el usuario tiene que dar ok de una y enviar el customerID
                 return {"error": f"It doesn't exist a customer with that ID"}, 406
-            
-            # Insertar nuevo usuario en la base de datos
-            cursor.execute("UPDATE customers SET status = 0 WHERE id = ?", (customerID,))
-            self.connection.commit()
-
+    
+            existing_user.status = 0
+            self.session.commit()
+    
             return {"message": f"ok"}, 200
-        except bd.Error as e:
-            # Manejar errores de la base de datos
+        except SQLAlchemyError as e:
             return {"error": str(e)}, 500
         
     def get_customers(self):
         try:
-            cursor = self.connection.cursor()
-            # Verificar si el usuario ya existe en la base de datos
-            cursor.execute("SELECT * FROM customers")
-            data = cursor.fetchall()
-            print('data', data)
-
-            users = [{"id": id, "nombre": nombre, "isLogged": True if status == 1 else (False)  } for id, nombre, status in data]
-
-            return {"message": "ok", "data": users}, 200
+            customers = self.session.query(Customer).all()
+            data = []
+            for customer in customers:
+                last_order = self.session.query(Order).filter_by(id_customer=customer.id).order_by(Order.orderDate.desc()).first()
+                user = {
+                    "id": customer.id,
+                    "nombre": customer.name,
+                    "isLogged": True if customer.status == 1 else False,
+                    "groups": last_order.orderName if last_order else None
+                }
+                data.append(user)
+            return {"message": "ok", "data": data}, 200
             
-        except bd.Error as e:
-            # Manejar errores de la base de datos
-            return {"error": str(e)}, 500
-
-    def add_order(self, customerID, orderName):
-        try:
-            cursor = self.connection.cursor()
-            # Verificar si el usuario ya existe en la base de datos
-            cursor.execute("SELECT * FROM customers WHERE id=?", (customerID,))
-            existing_user = cursor.fetchone()
-
-            if not existing_user:
-                # si existe el usuario tiene que dar ok de una y enviar el customerID
-                return {"error": f"It doesn't exist a customer with that ID"}, 406
-            
-            # Insertar nuevo usuario en la base de datos
-            cursor.execute("INSERT INTO orders (id_customer, orderDate, orderName) VALUES (?, datetime('now'), ?)", (customerID, orderName, ))
-            self.connection.commit()
-
-            return {"message": f"Order '{orderName}' successfully added"}, 200
-            
-        except bd.Error as e:
-            # Manejar errores de la base de datos
-            return {"error": str(e)}, 500
-        
-    def get_orders(self, customerID):
-        try:
-            cursor = self.connection.cursor()
-            cursor.execute("""
-                SELECT orders.id, orders.orderName, orders.orderDate, customers.name AS customer 
-                FROM orders
-                INNER JOIN customers ON customers.id = ?
-                WHERE orders.id_customer = ?
-            """, (customerID, customerID, ))
-            data = cursor.fetchall()
-
-            orders = [{"id": id,  "orderDate": orderDate, "orderName": orderName, "customer": customer } for id, orderName, orderDate, customer in data]
-
-            return {"message": "ok", "data": orders}, 200
-            
-        except bd.Error as e:
+        except SQLAlchemyError as e:
             # Manejar errores de la base de datos
             return {"error": str(e)}, 500
     
-Base.metadata.create_all(engine)
+    def add_order(self, customerID, orderName):
+        try:
+            existing_user = self.session.query(Customer).filter_by(id=customerID).first()
+    
+            if not existing_user:
+                return {"error": f"It doesn't exist a customer with that ID"}, 406
+            
+            new_order = Order(id_customer=customerID, orderName=orderName)
+            self.session.add(new_order)
+            self.session.commit()
+    
+            return {"message": f"Order '{orderName}' successfully added"}, 200
+            
+        except SQLAlchemyError as e:
+            # Manejar errores de la base de datos
+            return {"error": str(e)}, 500
+    
+    def get_orders(self, customerID):
+        try:
+            orders = self.session.query(Order,Customer).join(Customer).filter(Order.id_customer == customerID).all()
+            data = [{"id": order[0].id, "orderDate": order[0].orderDate, "orderName": order[0].orderName, "customer": order[1].name} for order in orders]
+            return {"message": "ok", "data": data}, 200
+            
+        except SQLAlchemyError as e:
+            # Manejar errores de la base de datos
+            return {"error": str(e)}, 500
