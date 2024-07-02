@@ -92,7 +92,7 @@ class DbManager:
             if not existing_user:
                 return {"error": f"It doesn't exist a customer with that ID"}, 406
             
-            new_order = Order(id_customer=customerID, orderName=orderName)
+            new_order = Order(id_customer=customerID, orderName=orderName, orderDate=datetime.now())
             self.session.add(new_order)
             self.session.commit()
     
