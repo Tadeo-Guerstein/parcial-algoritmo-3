@@ -109,7 +109,5 @@ class DbManager:
             return {"message": "ok", "data": data}, 200
             
         except SQLAlchemyError as e:
-        except SQLAlchemyError as e:
             # Manejar errores de la base de datos
-            return {"error": str(e)}, 500
             return {"error": str(e)}, 500
